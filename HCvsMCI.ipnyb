@@ -1,0 +1,51 @@
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import roc_auc_score, accuracy_score
+import numpy as np
+import matplotlib.pyplot as plt
+import scikitplot
+
+# Set up Train, Val, Test sets for HCvMCI
+XTrainHvM, XTempTest, YTrainHvM, YTempTest = train_test_split(HCvMCI, YHvM, test_size=0.2, random_state=100)
+XValHvM, XTestHvM, YValHvM, YTestHvM = train_test_split(XTempTest, YTempTest, test_size=0.4, random_state=100)
+
+# Define the parameter grid
+ncores = 2
+grid = {
+    'C': np.linspace(1e-10, 1e5, num=100),  # Inverse lambda
+    'penalty': ['l1'],
+    'solver': ['liblinear', 'saga'] # Add solvers that support l1 penalty
+}
+paramGrid = GridSearchCV(estimator=LogisticRegression(tol=1e-10, random_state=100, n_jobs=ncores, verbose=1),
+                         param_grid=grid, scoring='roc_auc', n_jobs=ncores, cv=5)
+
+# Fit the GridSearchCV object
+paramGrid.fit(XTrainHvM, YTrainHvM)
+
+# Get the best model
+bestModel = paramGrid.best_estimator_
+
+# Evaluate on validation set (optional)
+y_val_pred = bestModel.predict_proba(XValHvM)
+val_auc = roc_auc_score(YValHvM, y_val_pred[:, 1])
+print(f"Validation AUC: {val_auc:.4f}")
+
+# Test on Test Set
+RLRTestPred = bestModel.predict_proba(XTestHvM)
+RLRTestPred2 = bestModel.predict(XTestHvM)
+
+# Plot Receiver Operating Characteristic (ROC) Curve
+plt.figure(figsize=(8, 6))
+scikitplot.metrics.plot_roc(YTestHvM, RLRTestPred, title='LR with LASSO')
+plt.show()
+
+# Plot the Confusion Matrix for additional insight
+plt.figure(figsize=(8, 6))
+scikitplot.metrics.plot_confusion_matrix(YTestHvM, RLRTestPred2)
+plt.show()
+
+# Metrics on test set
+test_auc = roc_auc_score(YTestHvM, RLRTestPred[:, 1])
+test_acc = accuracy_score(YTestHvM, RLRTestPred2)
+print(f"Test AUC: {test_auc:.4f}")
+print(f"Test Accuracy: {test_acc:.4f}")
