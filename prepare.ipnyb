@@ -1,0 +1,38 @@
+
+import warnings
+warnings.filterwarnings("ignore")
+import os
+import matplotlib, scipy, sklearn, pandas, nilearn, nipype, scikitplot
+from sklearn import preprocessing, model_selection, linear_model
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from nipype.interfaces import matlab
+import matplotlib.pyplot as plt
+import pandas
+import numpy as np
+HCvMCI = pandas.read_csv('/content/drive/MyDrive/EEGDataset/MCIvsHCFourier.csv')
+MCIvAD = pandas.read_csv('/content/drive/MyDrive/EEGDataset/MCIvsADFourier.csv')
+ADvHC = pandas.read_csv('/content/drive/MyDrive/EEGDataset/ADvsHCFourier.csv')
+#you can custom this address
+
+HCvMCI = np.asarray(HCvMCI)
+MCIvAD = np.asarray(MCIvAD)
+ADvHC = np.asarray(ADvHC)
+
+HCvMCI = HCvMCI[:,1:]
+MCIvAD = MCIvAD[:,1:]
+ADvHC = ADvHC[:,1:]
+
+YHvM = HCvMCI[:,304]
+YMvA = MCIvAD[:,304]
+YAvH = ADvHC[:,304]
+
+HCvMCI = HCvMCI[:,0:304]
+MCIvAD = MCIvAD[:,0:304]
+ADvHC = ADvHC[:,0:304]
+
+HCvMCI = preprocessing.scale(HCvMCI, axis=0)
+MCIvAD = preprocessing.scale(MCIvAD, axis=0)
+ADvHC = preprocessing.scale(ADvHC, axis=0)
+
+freq_bands = scipy.signal.welch(ADvHC, fs=256)
