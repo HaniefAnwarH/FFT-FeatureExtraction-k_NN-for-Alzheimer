@@ -1,0 +1,34 @@
+#All models for MCI v AD
+# Set up Train, Val, Test sets for MCI vs AD
+[train_inds, test_inds] = next(
+        model_selection.ShuffleSplit(
+                test_size=0.2,random_state=100).split(
+                        MCIvAD,y=YMvA
+                        )
+        )
+
+XTempTrain = MCIvAD[train_inds,]
+
+# Split Train Set into Train and Validation Sets
+[train2_inds, val_inds] = next(
+        model_selection.ShuffleSplit(
+                test_size=0.4,random_state=100).split(
+                        XTempTrain,y=YMvA[train_inds]
+                        )
+        )
+
+# Form the indices to select for each set
+TrainInds = train_inds[train2_inds]
+ValInds = train_inds[val_inds]
+TestInds = test_inds
+
+
+# Create sets of X and Y data using indices  for MCIvAD
+
+XTrainMvA = MCIvAD[TrainInds,]
+YTrainMvA = YMvA[TrainInds]
+XValMvA = MCIvAD[ValInds,]
+YValMvA = YMvA[ValInds]
+XTestMvA = MCIvAD[TestInds,]
+YTestMvA = YMvA[TestInds]
+
