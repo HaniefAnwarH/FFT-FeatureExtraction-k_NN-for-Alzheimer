@@ -1,0 +1,5 @@
+#you need to install this library before run the code!
+!pip install nipype
+!pip install scikit-learn
+!pip install nilearn
+!pip install scikit-plot
